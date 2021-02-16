@@ -18,7 +18,8 @@
     "start-api": "cd api && venv/scripts/flask run",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "waitress-serve --listen=*:5000  server:app"
   },
   "eslintConfig": {
     "extends": [
