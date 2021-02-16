@@ -46,6 +46,7 @@ export default function StyledDropzone(props) {
           body: formData,
         };
         fetch('/api/getimage', options).then(res => res.json()).then(data => {
+          alert('yay');
         //   setCurrentImage(data.image);
         });
       }, []);

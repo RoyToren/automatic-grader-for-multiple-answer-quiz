@@ -5,7 +5,7 @@ from skimage import img_as_bool, io, color, morphology, img_as_ubyte
 from PIL import Image
 from io import BytesIO
 import numpy as np
-# import cv2
+import cv2
 import base64
 
 # from werkzeug import secure_filename
