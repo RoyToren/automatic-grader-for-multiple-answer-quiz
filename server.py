@@ -44,24 +44,24 @@ def get_image():
     edgeDetector(cv_image)
     return {'image': 'True'}
 
-# def edgeDetector(image):
-#     '''
-#     This function should get as input the grayscale 'image' and any additional
-#     parameters you need, and return 'edge_map': a binary image (same shape as 'image')
-#     with a value of 1 in each detected edge pixel and a value of zero otherwise.
-#     '''
-#     edge_map = cv2.Canny(image, 200,600) # Replace with edge detection code
-#     lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=600,)
-#     # Compute lines as before
-#     x1, x2, y1, y2 = [], [], [], []
-#     for line in lines:
-#         rho,theta = line[0]
-#         a = np.cos(theta)
-#         b = np.sin(theta)
-#         x0 = a*rho
-#         y0 = b*rho
-#         x1.append(int(x0 + 1000 * (-b)))
-#         y1.append(int(y0 + 1000 * (a)))
-#         x2.append(int(x0 - 1000 * (-b)))
-#         y2.append(int(y0 - 1000 * (a)))
-#     print(y1[0])
+def edgeDetector(image):
+    '''
+    This function should get as input the grayscale 'image' and any additional
+    parameters you need, and return 'edge_map': a binary image (same shape as 'image')
+    with a value of 1 in each detected edge pixel and a value of zero otherwise.
+    '''
+    edge_map = cv2.Canny(image, 200,600) # Replace with edge detection code
+    lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=600,)
+    # Compute lines as before
+    x1, x2, y1, y2 = [], [], [], []
+    for line in lines:
+        rho,theta = line[0]
+        a = np.cos(theta)
+        b = np.sin(theta)
+        x0 = a*rho
+        y0 = b*rho
+        x1.append(int(x0 + 1000 * (-b)))
+        y1.append(int(y0 + 1000 * (a)))
+        x2.append(int(x0 - 1000 * (-b)))
+        y2.append(int(y0 - 1000 * (a)))
+    print(y1[0])

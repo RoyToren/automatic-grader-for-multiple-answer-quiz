@@ -53,7 +53,7 @@ nibabel==3.2.1
 nipype==1.6.0
 notebook==6.1.5
 numpy==1.19.2
-opencv-python==4.4.0.46
+opencv-python-headless==4.4.0.46
 packaging==20.4
 pandocfilters==1.4.3
 parso==0.8.0
