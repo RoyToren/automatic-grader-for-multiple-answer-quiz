@@ -111,7 +111,7 @@ function App() {
               {activeStep === steps.length ? (
                 <React.Fragment>
                   <Typography variant="h5" gutterBottom>
-                    Thank you for using our service!
+                    Thank you for using our service 👏🏻
                   </Typography>
                 </React.Fragment>
               ) : (
