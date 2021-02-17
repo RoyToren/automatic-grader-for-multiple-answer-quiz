@@ -8,11 +8,6 @@ import numpy as np
 import cv2
 import base64
 
-# from werkzeug import secure_filename
-
-#local
-#app = Flask(__name__)
-
 #prod
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 
