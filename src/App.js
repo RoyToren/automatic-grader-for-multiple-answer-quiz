@@ -89,8 +89,7 @@ function App() {
     };
   
     return (
-      <div className="App">
-      <React.Fragment>
+      <React.Fragment className="App">
         <CssBaseline />
         <AppBar position="absolute" color="default" className={classes.appBar}>
           <Toolbar>
@@ -112,7 +111,7 @@ function App() {
               {activeStep === steps.length ? (
                 <React.Fragment>
                   <Typography variant="h5" gutterBottom>
-                    Thank you for using our service 👏🏻
+                    Thank you for using our service!
                   </Typography>
                 </React.Fragment>
               ) : (
@@ -149,7 +148,6 @@ function App() {
           </Container>
         </footer>
       </React.Fragment>
-      </div>
     );
   }
 
