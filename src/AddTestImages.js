@@ -1,6 +1,7 @@
 import React, {useCallback } from 'react';
 import {useDropzone} from 'react-dropzone';
 import styled from 'styled-components';
+import Typography from '@material-ui/core/Typography';
 
 const getColor = (props) => {
   if (props.isDragAccept) {
@@ -62,6 +63,10 @@ export default function StyledDropzone(props) {
   } = useDropzone({accept: 'image/*',onDrop});
   
   return (
+    <React.Fragment>
+    <Typography variant="h6" gutterBottom>
+      Upload images to check
+    </Typography>
     <div className="container">
       <Container {...getRootProps({isDragActive, isDragAccept, isDragReject})}>
         <input {...getInputProps()} />
@@ -69,5 +74,6 @@ export default function StyledDropzone(props) {
         <em>(Only *.jpeg and *.png images will be accepted)</em>
       </Container>
     </div>
+    </React.Fragment>
   );
 };

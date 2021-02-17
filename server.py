@@ -22,9 +22,9 @@ def index():
 def not_found(e):
     return app.send_static_file('index.html')
 
-@app.route('/api/time')
-def get_current_time():
-    return {'time': time.time()}
+# @app.route('/api/time')
+# def get_current_time():
+#     return {'time': time.time()}
 
 @app.route('/api/getimage', methods=['POST'])
 def get_image():
