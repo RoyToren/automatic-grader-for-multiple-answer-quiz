@@ -26,7 +26,7 @@ class EditCorretSolution extends Component {
         <Paper elevation={2} style={styles.Paper}>
           <form
             onSubmit={() => {
-              this.props.saveTodo(
+              this.props.saveAnswer(
                 this.props.index,
                 this.inputRef.current.value
               );
@@ -36,7 +36,7 @@ class EditCorretSolution extends Component {
             <Input
               style={{ width: "90%" }}
               type = "number"
-              defaultValue={this.props.todo}
+              defaultValue={this.props.answer}
               inputRef={this.inputRef}
             />
             <IconButton

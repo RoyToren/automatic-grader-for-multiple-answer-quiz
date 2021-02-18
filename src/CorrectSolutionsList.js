@@ -4,16 +4,16 @@ import EditCorretSolution from "./EditCorretSolution";
 import { Grid } from "@material-ui/core";
 
 class CorrectSolutionsList extends React.Component {
-  renderTodo = key => {
+  renderAnswer = key => {
     if (this.props.list[key] == null) return null;
     if (this.props.list[key]["status"] === "active") {
       return (
         <SolutionItem
           key={key}
           index={key}
-          todo={this.props.list[key]["todo"]}
-          deleteTodo={this.props.deleteTodo}
-          updateTodo={this.props.updateTodo}
+          answer={this.props.list[key]["answer"]}
+          deleteAnswer={this.props.deleteAnswer}
+          updateAnswer={this.props.updateAnswer}
         />
       );
     } else if (this.props.list[key]["status"] === "editing") {
@@ -21,8 +21,8 @@ class CorrectSolutionsList extends React.Component {
         <EditCorretSolution
           key={key}
           index={key}
-          todo={this.props.list[key]["todo"]}
-          saveTodo={this.props.saveTodo}
+          answer={this.props.list[key]["answer"]}
+          saveAnswer={this.props.saveAnswer}
         />
       );
     }
@@ -30,7 +30,7 @@ class CorrectSolutionsList extends React.Component {
   render() {
     return (
       <Grid container>
-        {Object.keys(this.props.list).map(key => this.renderTodo(key))}
+        {Object.keys(this.props.list).map(key => this.renderAnswer(key))}
       </Grid>
     );
   }

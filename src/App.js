@@ -63,39 +63,65 @@ const useStyles = makeStyles((theme) => ({
 
 const steps = ['Tests images', 'Correct answers', 'Results'];
 
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <AddTestImages />;
-    case 1:
-      return <AddTestSolutionForm />;
-    case 2:
-      return <GraderResults />;
-    default:
-      throw new Error('Unknown step');
-  }
-}
 function App() {
-   // const [currImage, setCurrentImage] = useState('false');
-    const classes = useStyles();
-    const [activeStep, setActiveStep] = React.useState(0);
-  
-    const handleNext = () => {
-      setActiveStep(activeStep + 1);
-    };
-  
-    const handleBack = () => {
-      setActiveStep(activeStep - 1);
-    };
-  
-    return (
-      <div className="App">
+  const [testImages, setTestImages] = React.useState(0);
+  const [testSolutionInfo, setTestSolutionInfo] = React.useState({});
+  const classes = useStyles();
+  const [activeStep, setActiveStep] = React.useState(0);
+
+  const AddTestImagesCallback = (testImages) => {
+    setTestImages(testImages)
+  }
+  const SetTestSolutionInfoCallback = (testSolution) => {
+    setTestSolutionInfo(testSolution)
+  }
+  function getStepContent(step) {
+    switch (step) {
+      case 0:
+        return <AddTestImages parentCallback={AddTestImagesCallback} />;
+      case 1:
+        return <AddTestSolutionForm parentCallback={SetTestSolutionInfoCallback} />;
+      case 2:
+        return <GraderResults />;
+      default:
+        throw new Error('Unknown step');
+    }
+  }
+  const handleNext = () => {
+    if (activeStep === steps.length - 2) {
+      let formData = new FormData();
+      formData.append('questions_count', testSolutionInfo.numberOfQuestions);
+      for (var key in testSolutionInfo.answersSolutionsList) {
+        formData.append(key, testSolutionInfo.answersSolutionsList[key].answer);
+      }
+      formData.append('images', testImages, testImages.name)
+      const options = {
+        headers: {
+          'Accept': 'application/json',
+        },
+        method: 'POST',
+        body: formData,
+      };
+      fetch('/api/checkTest', options).then(res => res.json()).then(data => {
+        alert('yay - checked');
+        //   setCurrentImage(data.image);
+      });
+    }
+    setActiveStep(activeStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep(activeStep - 1);
+  };
+
+  return (
+    <div className="App">
       <React.Fragment >
         <CssBaseline />
         <AppBar position="absolute" color="default" className={classes.appBar}>
           <Toolbar>
-            <Typography variant="h6" color="inherit"  noWrap>
-            Automatic multiple choice checker
+            <Typography variant="h6" color="inherit" noWrap>
+              Automatic multiple choice checker
             </Typography>
           </Toolbar>
         </AppBar>
@@ -116,41 +142,41 @@ function App() {
                   </Typography>
                 </React.Fragment>
               ) : (
-                <React.Fragment>
-                  {getStepContent(activeStep)}
-                  <div className={classes.buttons}>
-                    {activeStep !== 0 && (
-                      <Button onClick={handleBack} className={classes.button}>
-                        Back
+                  <React.Fragment>
+                    {getStepContent(activeStep)}
+                    <div className={classes.buttons}>
+                      {activeStep !== 0 && (
+                        <Button onClick={handleBack} className={classes.button}>
+                          Back
+                        </Button>
+                      )}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleNext}
+                        className={classes.button}
+                      >
+                        {activeStep === steps.length - 2 ? 'Submit' : 'Next'}
                       </Button>
-                    )}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleNext}
-                      className={classes.button}
-                    >
-                      {activeStep === steps.length - 2 ? 'Submit' : 'Next'}
-                    </Button>
-                  </div>
-                </React.Fragment>
-              )}
-  
+                    </div>
+                  </React.Fragment>
+                )}
+
             </React.Fragment>
           </Paper>
         </main>
         <footer className={classes.footer}>
           <Container maxWidth="sm">
-          <Typography variant="body2" color="inherit"  align="center">
-                {'Copyright © Roy and Batel '}
-                {new Date().getFullYear()}
-                {'.'}
+            <Typography variant="body2" color="inherit" align="center">
+              {'Copyright © Roy and Batel '}
+              {new Date().getFullYear()}
+              {'.'}
             </Typography>
           </Container>
         </footer>
       </React.Fragment>
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
 export default App;

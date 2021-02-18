@@ -7,41 +7,74 @@ import CorrectSolutionsList from "./CorrectSolutionsList";
 import _ from 'lodash';
 
 export default class AddTestSolutionForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      numberOfQuestions: 0,
+      answersSolutionsList: {},
+    };
 
-  state = {
-    list: {},
-  };
+    this.handleNumberOfQuestionsChange = this.handleNumberOfQuestionsChange.bind(this);
+  }
+  
 
-  addToList = (todo) => {
-    let listSize = _.size(this.state.list) + 1;
-    let list = { ...this.state.list };
+  handleNumberOfQuestionsChange(event) {
+    this.setState({numberOfQuestions: event.target.value});
+    this.props.parentCallback({
+      numberOfQuestions: event.target.value,
+      answersSolutionsList: this.state.answersSolutionsList
+    });
+  }
+
+  addToList = (answer) => {
+    let listSize = _.size(this.state.answersSolutionsList) + 1;
+    let list = { ...this.state.answersSolutionsList };
     list[listSize] = {
-      todo: todo,
+      answer: answer,
       status: "active"
     };
-    this.setState({ list: list });
+    this.setState({ answersSolutionsList: list });
+    this.props.parentCallback({
+      numberOfQuestions: this.state.numberOfQuestions,
+      answersSolutionsList: list
+    });
+
   };
-  deleteTodo = (key) => {
-    let list = { ...this.state.list };
+  deleteAnswer = (key) => {
+    let list = { ...this.state.answersSolutionsList };
     list[key] = null;
 
-    this.setState({ list });
+    this.setState({ answersSolutionsList: list });
+    this.props.parentCallback({
+      numberOfQuestions: this.state.numberOfQuestions,
+      answersSolutionsList: list
+    });
   };
-  updateTodo = (key) => {
-    let list = { ...this.state.list };
+  updateAnswer = (key) => {
+    let list = { ...this.state.answersSolutionsList };
     list[key]["status"] = "editing";
 
-    this.setState({ list });
+    this.setState({ answersSolutionsList: list });
+        this.props.parentCallback({
+      numberOfQuestions: this.state.numberOfQuestions,
+      answersSolutionsList: list
+    });
   };
-  saveTodo = (key, todo) => {
-    let list = { ...this.state.list };
+  saveAnswer = (key, answer) => {
+    let list = { ...this.state.answersSolutionsList };
     list[key] = {
-      todo: todo,
+      answer: answer,
       status: "active"
     };
 
-    this.setState({ list });
+    this.setState({ answersSolutionsList: list });
+    this.props.parentCallback({
+      numberOfQuestions: this.state.numberOfQuestions,
+      answersSolutionsList: list
+    });
   };
+
+
   render (){
     return (
     <React.Fragment>
@@ -50,17 +83,17 @@ export default class AddTestSolutionForm extends Component {
       </Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={12}>
-        <TextField required type="number" fullWidth id="standard-basic" label="Number of questions In test" />
+        <TextField required type="number" fullWidth id="standard-basic" label="Number of questions In test" value={this.state.numberOfQuestions} onChange={this.handleNumberOfQuestionsChange}/>
         </Grid>
         <Grid container spacing={0}>
           <Grid item xs={12}>
               <AddCorrectSolution addToList={this.addToList} />
           </Grid>
             <CorrectSolutionsList
-              deleteTodo={this.deleteTodo}
-              list={this.state.list}
-              updateTodo={this.updateTodo}
-              saveTodo={this.saveTodo}
+              deleteAnswer={this.deleteAnswer}
+              list={this.state.answersSolutionsList}
+              updateAnswer={this.updateAnswer}
+              saveAnswer={this.saveAnswer}
             />
         </Grid>
       </Grid> 

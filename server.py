@@ -1,9 +1,10 @@
 import time
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,jsonify
 from skimage.util import invert
 from skimage import img_as_bool, io, color, morphology, img_as_ubyte
 from PIL import Image
 from io import BytesIO
+import os
 import numpy as np
 import cv2
 import base64
@@ -26,20 +27,39 @@ def not_found(e):
 # def get_current_time():
 #     return {'time': time.time()}
 
-@app.route('/api/getimage', methods=['POST'])
-def get_image():
+@app.route('/api/checkTest', methods=['POST'])
+def check_test():
+    questions_count = 0
+    answers = {}
+    for field_name in request.form:
+        if field_name == 'questions_count':
+            questions_count = int(request.form[field_name])
+        else:
+            answers[int(field_name)] = int(request.form[field_name])
+    cv_image = process_image(request.files['images'])
+    edge_detector(cv_image)
+    complex_result = {
+        1: 0,
+        2: 1,
+        3: 0,
+        'correct': 1,
+        'wrong': 2
+    }
+    return jsonify(complex_result)
+
+def process_image(raw_image):
     #read image file string data
     # filestr = request.files['tests'].stream.read()
-    img = Image.open(request.files['tests']).convert('RGB')
+    
+    img = Image.open(raw_image).convert('RGB')
     #convert string data to numpy array
     img_array = np.array(img)
     # convert numpy array to image
     greyscale_img = invert(img_as_bool(color.rgb2gray(img_array)))
     cv_image = img_as_ubyte(greyscale_img)
-    edgeDetector(cv_image)
-    return {'image': 'True'}
+    return cv_image
 
-def edgeDetector(image):
+def edge_detector(image):
     '''
     This function should get as input the grayscale 'image' and any additional
     parameters you need, and return 'edge_map': a binary image (same shape as 'image')

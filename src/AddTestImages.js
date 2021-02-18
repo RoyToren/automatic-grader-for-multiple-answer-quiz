@@ -32,28 +32,13 @@ const Container = styled.div`
   transition: border .24s ease-in-out;
 `;  
 
-
-export default function StyledDropzone(props) {
+export default function AddTestImages(props) {
+    const parentProps = {...props};
     const onDrop = useCallback(acceptedFiles => {
-        let formData = new FormData();
-        formData.append('name', 'John');
-        formData.append('password', 'John123');
-        formData.append('tests',acceptedFiles[0],acceptedFiles[0].name)
-        const options = {
-          headers: {
-            'Accept': 'application/json',
-          },
-          method: 'POST',
-          body: formData,
-        };
-        fetch('/api/getimage', options).then(res => res.json()).then(data => {
-          alert('yay');
-        //   setCurrentImage(data.image);
-        });
-      }, []);
-    
-    //   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+      parentProps.parentCallback(acceptedFiles[0]);
 
+      }, [parentProps]);
+    
   const {
     getRootProps,
     getInputProps,

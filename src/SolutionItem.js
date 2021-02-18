@@ -16,8 +16,11 @@ const styles = {
     width: 500
   },
   numbering: {
-    color: "red",
+    fontWeight: "bold",
     marginRight: 10
+  },
+  answer: {
+    color: "black",
   }
 };
 
@@ -28,7 +31,7 @@ class SolutionItem extends Component {
 
   gridRef = React.createRef();
 
-  deleteTodo = () => {
+  deleteAnswer = () => {
     const fade = true;
     this.setState({ fade });
 
@@ -38,7 +41,7 @@ class SolutionItem extends Component {
       }, 500);
     });
 
-    promise.then(() => this.props.deleteTodo(this.props.index));
+    promise.then(() => this.props.deleteAnswer(this.props.index));
     console.log(this.state);
   };
 
@@ -55,19 +58,19 @@ class SolutionItem extends Component {
       >
         <Paper elevation={2} style={styles.Paper}>
           <span style={styles.numbering}>{this.props.index})</span>
-          <span style={styles.Todo}> {this.props.todo}</span>
+          <span style={styles.answer}> {this.props.answer}</span>
           <IconButton
             color="primary"
             aria-label="Edit"
             style={styles.Icon}
-            onClick={() => this.props.updateTodo(this.props.index)}
+            onClick={() => this.props.updateAnswer(this.props.index)}
           >
             <Edit fontSize="small" />
           </IconButton>
           <IconButton
             color="secondary"
             aria-label="Delete"
-            onClick={this.deleteTodo}
+            onClick={this.deleteAnswer}
           >
             <Delete fontSize="small" />
           </IconButton>
