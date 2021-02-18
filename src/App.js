@@ -89,7 +89,8 @@ function App() {
     };
   
     return (
-      <React.Fragment className="App">
+      <div className="App">
+      <React.Fragment >
         <CssBaseline />
         <AppBar position="absolute" color="default" className={classes.appBar}>
           <Toolbar>
@@ -148,6 +149,7 @@ function App() {
           </Container>
         </footer>
       </React.Fragment>
+      </div>
     );
   }
 
