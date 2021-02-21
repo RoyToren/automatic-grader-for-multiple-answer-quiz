@@ -13,6 +13,7 @@ import Container from '@material-ui/core/Container';
 import AddTestImages from './AddTestImages';
 import AddTestSolutionForm from './AddTestSolutionForm';
 import GraderResults from './GraderResults';
+import _ from 'lodash';
 import './App.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -66,6 +67,7 @@ const steps = ['Tests images', 'Correct answers', 'Results'];
 function App() {
   const [testImages, setTestImages] = React.useState(0);
   const [testSolutionInfo, setTestSolutionInfo] = React.useState({});
+  const [checkerResults, setCheckerResults] = React.useState({});
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
 
@@ -82,7 +84,7 @@ function App() {
       case 1:
         return <AddTestSolutionForm parentCallback={SetTestSolutionInfoCallback} />;
       case 2:
-        return <GraderResults />;
+        return <GraderResults data={checkerResults}/>;
       default:
         throw new Error('Unknown step');
     }
@@ -90,6 +92,16 @@ function App() {
   const handleNext = () => {
     if (activeStep === steps.length - 2) {
       let formData = new FormData();
+      if(testSolutionInfo.numberOfQuestions === null || testSolutionInfo.numberOfQuestions === 0)
+      {
+          alert("please enter the number of questions in the test");
+          return;
+      }
+      if(testSolutionInfo.answersSolutionsList === null || testSolutionInfo.answersSolutionsList === {} || _.size(testSolutionInfo.answersSolutionsList) !== parseInt(testSolutionInfo.numberOfQuestions) )
+      {
+          alert("please enter answers for the number of questions in the test");
+          return;
+      }
       formData.append('questions_count', testSolutionInfo.numberOfQuestions);
       for (var key in testSolutionInfo.answersSolutionsList) {
         formData.append(key, testSolutionInfo.answersSolutionsList[key].answer);
@@ -103,13 +115,32 @@ function App() {
         body: formData,
       };
       fetch('/api/checkTest', options).then(res => res.json()).then(data => {
-        alert('yay - checked');
-        //   setCurrentImage(data.image);
+        //alert('yay - checked');
+        setCheckerResults(data);
+        setActiveStep(activeStep + 1);
       });
+
     }
-    setActiveStep(activeStep + 1);
+
+    if (activeStep === steps.length - 3) {
+    if(testImages === null || testImages === 0)
+      {
+          alert("please enter an image of a test to check");
+          return;
+      }
+      setActiveStep(activeStep + 1);
+    }
+    if (activeStep === steps.length - 1) {
+      setActiveStep(activeStep + 1);
+    }
   };
 
+  const restartApp = () => {
+    setTestImages(0);
+    setTestSolutionInfo({});
+    setCheckerResults({});
+    setActiveStep(0);
+  };
   const handleBack = () => {
     setActiveStep(activeStep - 1);
   };
@@ -140,12 +171,20 @@ function App() {
                   <Typography variant="h5" gutterBottom>
                     Thank you for using our service 👏🏻
                   </Typography>
+                  <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={restartApp}
+                        className={classes.button}
+                      >
+                        Again
+                      </Button>
                 </React.Fragment>
               ) : (
                   <React.Fragment>
                     {getStepContent(activeStep)}
                     <div className={classes.buttons}>
-                      {activeStep !== 0 && (
+                      {activeStep !== 0 && activeStep !== 2 && (
                         <Button onClick={handleBack} className={classes.button}>
                           Back
                         </Button>

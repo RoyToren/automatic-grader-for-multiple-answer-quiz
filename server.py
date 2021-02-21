@@ -38,14 +38,24 @@ def check_test():
             answers[int(field_name)] = int(request.form[field_name])
     cv_image = process_image(request.files['images'])
     edge_detector(cv_image)
-    complex_result = {
-        1: 0,
-        2: 1,
-        3: 0,
-        'correct': 1,
-        'wrong': 2
+    checker_results = {
+        'questions_count': 6,#questions_count,
+        'answers' : [
+            {'question': 1,
+             'answer' : 0},
+            {'question': 2,
+             'answer' : 1},
+            {'question': 4,
+             'answer' :  0},
+            {'question': 5,
+             'answer' :  0},
+            {'question': 6,
+             'answer' :  0}
+        ],
+        'total_correct': 1,
+        'total_wrong': 5
     }
-    return jsonify(complex_result)
+    return jsonify(checker_results)
 
 def process_image(raw_image):
     #read image file string data
