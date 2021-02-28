@@ -6,7 +6,7 @@ from sklearn.preprocessing import normalize
 from scipy import signal
 
 class DigitAlgorithm:
-  def __init__(self, model_path, scaler_path,window_size = 16, resize_to=128, threshold =200):
+  def __init__(self, model_path, scaler_path,window_size = 14, resize_to=128, threshold =200):
     self.model = self.load_model(model_path)
     self.scaler = self. load_scaler(scaler_path)
     self.window_size = window_size
@@ -142,9 +142,24 @@ class DigitAlgorithm:
     plt.title("after threshold")
     plt.show()
     return digit_roi
+  
+  def pre_process_img_no_plot(self,img, resize_to = 128, threshold = 200):
+    digit_roi = cv2.resize(img, (resize_to, resize_to))
+    digit_roi = cv2.bitwise_not(digit_roi)
+    digit_roi = digit_roi > threshold
+    
+    return digit_roi
 
   def pre_process(self,img, scaler, resize_to = 128, threshold = 200):
     X_test = self.pre_process_img(img, resize_to, threshold)
+    X_test = np.array(X_test).reshape(1,-1)
+    # TODO: apply batching? or we want only one image?
+    # X_test = np.expand_dims(X_test, axis=0)
+    X_test = scaler.transform(X_test)
+    return X_test
+  
+  def pre_process_no_plot(self,img, scaler, resize_to = 128, threshold = 200):
+    X_test = self.pre_process_img_no_plot(img, resize_to, threshold)
     X_test = np.array(X_test).reshape(1,-1)
     # TODO: apply batching? or we want only one image?
     # X_test = np.expand_dims(X_test, axis=0)
@@ -161,6 +176,13 @@ class DigitAlgorithm:
     plt.imshow(input.reshape(self.resize_to, self.resize_to), cmap='gray')
     plt.title('input to recognition model')
     plt.show()
+    result = int(self.model.predict(input))
+    return result
+  
+  def predict_result(self, img):
+    result = []
+    digit_roi = self.extract_circled_digit(img,self.window_size)
+    input = self.pre_process_no_plot(digit_roi,self.scaler,self.resize_to)
     result = int(self.model.predict(input))
     return result
 

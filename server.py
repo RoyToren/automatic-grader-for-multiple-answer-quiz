@@ -4,6 +4,7 @@ from skimage.util import invert
 from skimage import img_as_bool, io, color, morphology, img_as_ubyte
 from PIL import Image
 from io import BytesIO
+from algorithm import DigitAlgorithm
 import os
 import numpy as np
 import cv2
@@ -46,13 +47,16 @@ def check_test():
         }
     for key, img in enumerate(questions_images):
         answer = batel_algo(img)
+        if(answer == answers[key+1]):
+            checker_results['total_correct'] = checker_results['total_correct'] + 1
+            answer = 1
+        else:
+            checker_results['total_wrong'] = checker_results['total_wrong'] + 1
+            answer = 0
+            
         checker_results['answers'].append({
             'question': key + 1,
             'answer' : answer})
-        if(answer == answers[key+1]):
-            checker_results['total_correct'] = checker_results['total_correct'] + 1
-        else:
-            checker_results['total_wrong'] = checker_results['total_wrong'] + 1
         
     # checker_results = {
     #     'questions_count': 6,#questions_count,
@@ -78,7 +82,7 @@ def process_image(raw_image):
     #convert string data to numpy array
     img_array = np.array(img)
     # convert numpy array to image
-    greyscale_img = invert(img_as_bool(color.rgb2gray(img_array)))
+    greyscale_img = img_as_bool(color.rgb2gray(img_array))
     cv_image = img_as_ubyte(greyscale_img)
     return cv_image
 
@@ -89,26 +93,30 @@ def extract_questions_from_image(image):
     with a value of 1 in each detected edge pixel and a value of zero otherwise.
     '''
     edge_map = cv2.Canny(image, 200,600)
-    lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=600,)
+    lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=800,)
     # Compute lines
-    x1, x2, y1, y2 = [], [], [], []
-    for line in lines:
-        rho,theta = line[0]
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a*rho
-        y0 = b*rho
-        x1.append(int(x0 + 1000 * (-b)))
-        y1.append(int(y0 + 1000 * (a)))
-        x2.append(int(x0 - 1000 * (-b)))
-        y2.append(int(y0 - 1000 * (a)))
-        
-    questions_images = []
-    starty = 0
-    for i in range(len(y1)):
-        questions_images.append(image[starty:int(y1[i])])
-        starty = int(y1[i])
-    return questions_images
+    if lines is not None:
+        x1, x2, y1, y2 = [], [], [], []
+        for line in lines:
+            rho,theta = line[0]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a*rho
+            y0 = b*rho
+            x1.append(int(x0 + 1000 * (-b)))
+            y1.append(int(y0 + 1000 * (a)))
+            x2.append(int(x0 - 1000 * (-b)))
+            y2.append(int(y0 - 1000 * (a)))
+            
+        questions_images = []
+        starty = 0
+        for i in range(len(y1)):
+            questions_images.append(image[starty:int(y1[i])])
+            starty = int(y1[i])
+        return questions_images
+    return [image]
 
 def batel_algo(image):
-    return 1
+  # initialize our model:
+  detector = DigitAlgorithm("pickle_model.pkl","scaler.pkl")
+  return detector.predict_result(image)

@@ -66,6 +66,7 @@ const steps = ['Tests images', 'Correct answers', 'Results'];
 
 function App() {
   const [testImages, setTestImages] = React.useState(0);
+  const [isSubmit, setIsSubmit] = React.useState(0);
   const [testSolutionInfo, setTestSolutionInfo] = React.useState({});
   const [checkerResults, setCheckerResults] = React.useState({});
   const classes = useStyles();
@@ -91,6 +92,7 @@ function App() {
   }
   const handleNext = () => {
     if (activeStep === steps.length - 2) {
+      
       let formData = new FormData();
       if(testSolutionInfo.numberOfQuestions === null || testSolutionInfo.numberOfQuestions === 0)
       {
@@ -114,6 +116,7 @@ function App() {
         method: 'POST',
         body: formData,
       };
+      setIsSubmit(1);
       fetch('/api/checkTest', options).then(res => res.json()).then(data => {
         //alert('yay - checked');
         setCheckerResults(data);
@@ -140,6 +143,7 @@ function App() {
     setTestSolutionInfo({});
     setCheckerResults({});
     setActiveStep(0);
+    setIsSubmit(0);
   };
   const handleBack = () => {
     setActiveStep(activeStep - 1);
@@ -194,7 +198,10 @@ function App() {
                         color="primary"
                         onClick={handleNext}
                         className={classes.button}
+                        disabled={isSubmit}
                       >
+                        <CircularProgress
+                         />
                         {activeStep === steps.length - 2 ? 'Submit' : 'Next'}
                       </Button>
                     </div>
