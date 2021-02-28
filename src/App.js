@@ -200,8 +200,7 @@ function App() {
                         className={classes.button}
                         disabled={isSubmit}
                       >
-                        <CircularProgress
-                         />
+                        {/* <CircularProgress/> */}
                         {activeStep === steps.length - 2 ? 'Submit' : 'Next'}
                       </Button>
                     </div>
