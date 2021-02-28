@@ -24,3 +24,5 @@ yarn-error.log*
 /api
 .vscode
 __pycache__
+
+.idea/
