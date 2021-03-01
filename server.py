@@ -10,11 +10,13 @@ import threading
 import numpy as np
 import cv2
 import base64
+import random
+
 
 #prod
 app = Flask(__name__, static_folder='./build', static_url_path='/')
-tasks = []
-results = []
+tasks = {}
+results = {}
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 80))
@@ -88,11 +90,11 @@ def start_task():
         'total_correct': 0,
         'total_wrong': 0
         }
-    new_task_id  = len(tasks)
+    new_task_id  = random.randint(0, 10000)
     task = threading.Thread(target=do_work, kwargs={'questions_images': questions_images, 'checker_results' : checker_results, 'answers' : answers, 'results' : results, 'task_id' : new_task_id})
     task.start()
-    tasks.append(task)
-    results.append(None)
+    tasks[new_task_id] = task
+    results[new_task_id] = None
     return jsonify({'task_id': new_task_id, 'total_tasks': len(tasks)})
 
 
