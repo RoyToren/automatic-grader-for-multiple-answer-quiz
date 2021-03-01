@@ -66,7 +66,6 @@ const steps = ['Tests images', 'Correct answers', 'Results'];
 
 function App() {
   const [testImages, setTestImages] = React.useState(0);
-  const [intervalId,setIntervalId] = React.useState(0);
   const [isSubmit, setIsSubmit] = React.useState(0);
   const [testSolutionInfo, setTestSolutionInfo] = React.useState({});
   const [checkerResults, setCheckerResults] = React.useState({});
@@ -120,7 +119,7 @@ function App() {
       setIsSubmit(1);
 
       fetch('/api/checkTest', options).then(res => res.json()).then(data => {
-            let currID = setInterval(async () => {
+            const currID = setInterval(async () => {
             const res = await fetch(`/api/returnResults/`+ data['task_id'], {
              headers : { 
               'Content-Type': 'application/json',
@@ -130,14 +129,15 @@ function App() {
               if(new_data['status'] == 'finished'){
                 setCheckerResults(new_data['result']);
                 setIsSubmit(0);
+                clearInterval(currID);
                 setActiveStep(activeStep + 1);
               }
               else if(new_data['status'] == 'not started')
               {
+                clearInterval(currID);
                 alert('internal error, please try again');
               }
-            }, 10000);
-            setIntervalId(currID);
+            }, 20000);
       });
     }
 
@@ -160,8 +160,6 @@ function App() {
     setCheckerResults({});
     setActiveStep(0);
     setIsSubmit(0);
-    clearInterval(intervalId);
-    setIntervalId(0);
   };
   const handleBack = () => {
     setActiveStep(activeStep - 1);
