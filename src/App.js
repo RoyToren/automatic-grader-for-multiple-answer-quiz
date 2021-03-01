@@ -121,7 +121,11 @@ function App() {
 
       fetch('/api/checkTest', options).then(res => res.json()).then(data => {
             let currID = setInterval(async () => {
-            const res = await fetch('/api/returnResults/'+ data['task_id']);
+            const res = await fetch(`/api/returnResults/`+ data['task_id'], {
+             headers : { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+             }});
             const new_data = await res.json();
               if(new_data['status'] == 'finished'){
                 setCheckerResults(new_data['result']);
