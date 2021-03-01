@@ -6,12 +6,15 @@ from PIL import Image
 from io import BytesIO
 from algorithm import DigitAlgorithm
 import os
+import threading
 import numpy as np
 import cv2
 import base64
 
 #prod
 app = Flask(__name__, static_folder='./build', static_url_path='/')
+tasks = []
+results = []
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 80))
@@ -24,27 +27,18 @@ def index():
 def not_found(e):
     return app.send_static_file('index.html')
 
-# @app.route('/api/time')
-# def get_current_time():
-#     return {'time': time.time()}
+@app.route('/api/returnResults/<int:task_id>')
+def get_results(task_id):
+    if tasks[task_id].is_alive():
+        return jsonify({'status': 'running'})
+    try:
+        tasks[task_id].join()
+        return jsonify({'status': 'finished', 'result': results[task_id]})
+    except RuntimeError:
+        return jsonify({'status': 'not started'})
 
-@app.route('/api/checkTest', methods=['POST'])
-def check_test():
-    questions_count = 0
-    answers = {}
-    for field_name in request.form:
-        if field_name == 'questions_count':
-            questions_count = int(request.form[field_name])
-        else:
-            answers[int(field_name)] = int(request.form[field_name])
-    cv_image = process_image(request.files['images'])
-    
-    questions_images = extract_questions_from_image(cv_image)
-    checker_results = {'questions_count': questions_count,
-        'answers' : [],
-        'total_correct': 0,
-        'total_wrong': 0
-        }
+
+def do_work(questions_images, checker_results ,answers,results, task_id):
     for key, img in enumerate(questions_images):
         answer = batel_algo(img)
         if(answer == answers[key+1]):
@@ -75,7 +69,84 @@ def check_test():
     #     'total_correct': 1,
     #     'total_wrong': 5
     # }
-    return jsonify(checker_results)
+    results[task_id] = checker_results
+        
+@app.route('/api/checkTest', methods=['POST'])
+def start_task(): 
+    questions_count = 0
+    answers = {}
+    for field_name in request.form:
+        if field_name == 'questions_count':
+            questions_count = int(request.form[field_name])
+        else:
+            answers[int(field_name)] = int(request.form[field_name])
+    cv_image = process_image(request.files['images'])
+    
+    questions_images = extract_questions_from_image(cv_image)
+    checker_results = {'questions_count': questions_count,
+        'answers' : [],
+        'total_correct': 0,
+        'total_wrong': 0
+        }
+    new_task_id  = len(tasks)
+    task = threading.Thread(target=do_work, kwargs={'questions_images': questions_images, 'checker_results' : checker_results, 'answers' : answers, 'results' : results, 'task_id' : new_task_id})
+    task.start()
+    tasks.append(task)
+    results.append(None)
+    return jsonify({'task_id': new_task_id, 'total_tasks': len(tasks)})
+
+
+# def check_test(questions_images, checker_results ,answers): 
+    
+
+
+# def check_test():
+#     questions_count = 0
+#     answers = {}
+#     for field_name in request.form:
+#         if field_name == 'questions_count':
+#             questions_count = int(request.form[field_name])
+#         else:
+#             answers[int(field_name)] = int(request.form[field_name])
+#     cv_image = process_image(request.files['images'])
+    
+#     questions_images = extract_questions_from_image(cv_image)
+#     checker_results = {'questions_count': questions_count,
+#         'answers' : [],
+#         'total_correct': 0,
+#         'total_wrong': 0
+#         }
+#     for key, img in enumerate(questions_images):
+#         answer = batel_algo(img)
+#         if(answer == answers[key+1]):
+#             checker_results['total_correct'] = checker_results['total_correct'] + 1
+#             answer = 1
+#         else:
+#             checker_results['total_wrong'] = checker_results['total_wrong'] + 1
+#             answer = 0
+            
+#         checker_results['answers'].append({
+#             'question': key + 1,
+#             'answer' : answer})
+        
+#     # checker_results = {
+#     #     'questions_count': 6,#questions_count,
+#     #     'answers' : [
+#     #         {'question': 1,
+#     #          'answer' : 0},
+#     #         {'question': 2,
+#     #          'answer' : 1},
+#     #         {'question': 4,
+#     #          'answer' :  0},
+#     #         {'question': 5,
+#     #          'answer' :  0},
+#     #         {'question': 6,
+#     #          'answer' :  0}
+#     #     ],
+#     #     'total_correct': 1,
+#     #     'total_wrong': 5
+#     # }
+#     return jsonify(checker_results)
 
 def process_image(raw_image):
     img = Image.open(raw_image).convert('RGB')
