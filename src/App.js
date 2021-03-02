@@ -14,7 +14,9 @@ import AddTestImages from './AddTestImages';
 import AddTestSolutionForm from './AddTestSolutionForm';
 import GraderResults from './GraderResults';
 import _ from 'lodash';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import './App.css';
+import { green } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -60,6 +62,10 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
     marginLeft: theme.spacing(1),
   },
+  progress: {
+    marginTop: 'auto',
+    color: 'green'
+  }
 }));
 
 const steps = ['Tests images', 'Correct answers', 'Results'];
@@ -205,20 +211,19 @@ function App() {
                     {getStepContent(activeStep)}
                     <div className={classes.buttons}>
                       {activeStep !== 0 && activeStep !== 2 && (
-                        <Button onClick={handleBack} className={classes.button}>
+                        <Button onClick={handleBack} className={classes.button} disabled={isSubmit}>
                           Back
                         </Button>
                       )}
-                      <Button
+                      { isSubmit ? <CircularProgress className={classes.progress}/>  : <Button
                         variant="contained"
                         color="primary"
                         onClick={handleNext}
                         className={classes.button}
                         disabled={isSubmit}
-                      >
-                        {/* <CircularProgress/> */}
-                        {activeStep === steps.length - 2 ? 'Submit' : 'Next'}
-                      </Button>
+                      >{activeStep === steps.length - 2 ? 'Submit' : 'Next'}
+                      </Button>}
+                        
                     </div>
                   </React.Fragment>
                 )}
