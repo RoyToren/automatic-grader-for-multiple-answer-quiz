@@ -137,7 +137,7 @@ function App() {
                 clearInterval(currID);
                 alert('internal error, please try again');
               }
-            }, 20000);
+            }, 45000);
       });
     }
 
