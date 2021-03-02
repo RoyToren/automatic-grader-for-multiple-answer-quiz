@@ -90,7 +90,7 @@ def start_task():
         'total_correct': 0,
         'total_wrong': 0
         }
-    new_task_id  = random.randint(0, 10000)
+    new_task_id  = random.randint(0, 10000000)
     task = threading.Thread(target=do_work, kwargs={'questions_images': questions_images, 'checker_results' : checker_results, 'answers' : answers, 'results' : results, 'task_id' : new_task_id})
     task.start()
     tasks[new_task_id] = task
