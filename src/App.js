@@ -215,7 +215,7 @@ function App() {
                           Back
                         </Button>
                       )}
-                      { isSubmit ? <CircularProgress className={classes.progress}/>  : <Button
+                      { isSubmit ? <CircularProgress className={classes.progress}/> : <Button
                         variant="contained"
                         color="primary"
                         onClick={handleNext}
@@ -223,11 +223,10 @@ function App() {
                         disabled={isSubmit}
                       >{activeStep === steps.length - 2 ? 'Submit' : 'Next'}
                       </Button>}
-                        
                     </div>
                   </React.Fragment>
                 )}
-
+              { isSubmit ? <span>Please wait for the results 🔎</span> : null} 
             </React.Fragment>
           </Paper>
         </main>
