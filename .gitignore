@@ -25,4 +25,5 @@ yarn-error.log*
 .vscode
 __pycache__
 
+*.pkl
 .idea/
