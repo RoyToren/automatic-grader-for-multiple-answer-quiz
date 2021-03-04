@@ -5,6 +5,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Paper from '@material-ui/core/Paper';
 import Stepper from '@material-ui/core/Stepper';
+import Divider from '@material-ui/core/Divider';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
@@ -17,6 +18,7 @@ import _ from 'lodash';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import './App.css';
 import { green } from '@material-ui/core/colors';
+import { List, ListItem } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -65,6 +67,15 @@ const useStyles = makeStyles((theme) => ({
   progress: {
     marginTop: 'auto',
     color: 'green'
+  },
+  divider: {
+    marginTop: theme.spacing(3),
+    marginLeft: 'auto',
+    marginRight: 'auto'
+  },
+  listItem: {
+    display: 'block',
+    textAlign: 'center'
   }
 }));
 
@@ -143,7 +154,7 @@ function App() {
                 clearInterval(currID);
                 alert('internal error, please try again');
               }
-            }, 45000);
+            }, 20000);
       });
     }
 
@@ -228,6 +239,21 @@ function App() {
                 )}
               { isSubmit ? <span>Please wait for the results 🔎</span> : null} 
             </React.Fragment>
+            <Divider className={classes.divider}/>
+            <h3>Our assumptions:</h3>
+            <List >
+              <ListItem className={classes.listItem}>
+              <span>1) Horizontal lines separate each question</span>
+              </ListItem>
+              <ListItem className={classes.listItem}>
+              <span>2) Answer formatting is numeral, not alphabetic</span>
+              </ListItem>
+              <ListItem className={classes.listItem}>
+              <span>3) Answers are Circled with a reasonable size and do not hide the number</span>
+              </ListItem>
+            </List>
+            <h3>Example:</h3>
+            <img width="75%" src="./testExample.jpg" alt="example"></img>
           </Paper>
         </main>
         <footer className={classes.footer}>

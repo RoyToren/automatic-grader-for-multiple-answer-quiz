@@ -17,6 +17,7 @@ import random
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 tasks = {}
 results = {}
+detector = DigitAlgorithm("pickle_model.pkl","scaler.pkl")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 80))
@@ -84,7 +85,7 @@ def start_task():
             answers[int(field_name)] = int(request.form[field_name])
     cv_image = process_image(request.files['images'])
     
-    questions_images = extract_questions_from_image(cv_image)
+    questions_images = extract_questions_from_image(cv_image,questions_count)
     checker_results = {'questions_count': questions_count,
         'answers' : [],
         'total_correct': 0,
@@ -151,45 +152,45 @@ def start_task():
 #     return jsonify(checker_results)
 
 def process_image(raw_image):
-    img = Image.open(raw_image).convert('RGB')
+    img = Image.open(raw_image)
     #convert string data to numpy array
     img_array = np.array(img)
     # convert numpy array to image
-    greyscale_img = img_as_bool(color.rgb2gray(img_array))
-    cv_image = img_as_ubyte(greyscale_img)
+    greyscale_img = img_array
+    cv_image = cv2.cvtColor(img_as_ubyte(greyscale_img), cv2.COLOR_BGR2GRAY)
     return cv_image
 
-def extract_questions_from_image(image):
+def extract_questions_from_image(image,questions_count):
     '''
     This function should get as input the grayscale 'image' and any additional
     parameters you need, and return 'edge_map': a binary image (same shape as 'image')
     with a value of 1 in each detected edge pixel and a value of zero otherwise.
     '''
     edge_map = cv2.Canny(image, 200,600)
-    lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=800,)
+    # lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=800,)
+    lines = cv2.HoughLinesP( edge_map,rho=2,theta=np.pi/180,threshold=600,minLineLength = 100, maxLineGap = 1)
     # Compute lines
     if lines is not None:
+        lines = np.sort(lines, axis=0)
+        if len(lines) == questions_count*2:
+            lines = lines[::2]
         x1, x2, y1, y2 = [], [], [], []
         for line in lines:
-            rho,theta = line[0]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a*rho
-            y0 = b*rho
-            x1.append(int(x0 + 1000 * (-b)))
-            y1.append(int(y0 + 1000 * (a)))
-            x2.append(int(x0 - 1000 * (-b)))
-            y2.append(int(y0 - 1000 * (a)))
-            
+            points = line[0]
+            x1.append(int(points[0]))
+            y1.append(int(points[1]))
+            x2.append(int(points[2]))
+            y2.append(int(points[3]))
         questions_images = []
         starty = 0
         for i in range(len(y1)):
-            questions_images.append(image[starty:int(y1[i])])
+            if(image[starty:int(y1[i])].size > 100000):
+                questions_images.append(image[starty:int(y1[i])])
             starty = int(y1[i])
         return questions_images
     return [image]
 
 def batel_algo(image):
   # initialize our model:
-  detector = DigitAlgorithm("pickle_model.pkl","scaler.pkl")
-  return detector.predict_result(image)
+
+  return detector.predict(image)

@@ -6,7 +6,7 @@ from sklearn.preprocessing import normalize
 from scipy import signal
 
 class DigitAlgorithm:
-  def __init__(self, model_path, scaler_path,window_size = 14, resize_to=128, threshold =200):
+  def __init__(self, model_path, scaler_path,window_size = 16, resize_to=128, threshold =200):
     self.model = self.load_model(model_path)
     self.scaler = self. load_scaler(scaler_path)
     self.window_size = window_size
@@ -168,6 +168,10 @@ class DigitAlgorithm:
 
   def predict(self, img):
     result = []
+    plt.imshow(img,cmap='gray')
+    plt.show()
+    filename = 'savedImage.jpg'
+    cv2.imwrite(filename, img) 
     digit_roi = self.extract_circled_digit(img,self.window_size)
     plt.imshow(digit_roi,cmap='gray')
     plt.title('extraction of digit')
@@ -185,9 +189,16 @@ class DigitAlgorithm:
     input = self.pre_process_no_plot(digit_roi,self.scaler,self.resize_to)
     result = int(self.model.predict(input))
     return result
+  
+  def extract_image(self, img):
+    plt.imshow(img,cmap='gray')
+    plt.show()
+    filename = 'savedImage.jpg'
+    cv2.imwrite(filename, img) 
+    return 1
 
 if __name__ == "__main__":
-  image_path = '../test/bigfont1.jpg'
+  image_path = '../test/savedImage1.jpg'
   # Read the image in grayscale
   img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
   # initialize our model:
