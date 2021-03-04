@@ -191,4 +191,4 @@ def extract_questions_from_image(image,questions_count):
 def batel_algo(image):
   # initialize our model:
   image = cv2.resize(image,(800,200))
-  return detector.predict(image)
+  return detector.predict_result(image)
