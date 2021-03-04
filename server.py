@@ -44,6 +44,9 @@ def get_results(task_id):
 def do_work(questions_images, checker_results ,answers,results, task_id):
     for key, img in enumerate(questions_images):
         answer = batel_algo(img)
+        checker_results['detected_answers'].append({
+            'question': key + 1,
+            'answer' : answer})
         if(answer == answers[key+1]):
             checker_results['total_correct'] = checker_results['total_correct'] + 1
             answer = 1
@@ -89,7 +92,8 @@ def start_task():
     checker_results = {'questions_count': questions_count,
         'answers' : [],
         'total_correct': 0,
-        'total_wrong': 0
+        'total_wrong': 0,
+        'detected_answers' : [],
         }
     new_task_id  = random.randint(0, 10000000)
     task = threading.Thread(target=do_work, kwargs={'questions_images': questions_images, 'checker_results' : checker_results, 'answers' : answers, 'results' : results, 'task_id' : new_task_id})
