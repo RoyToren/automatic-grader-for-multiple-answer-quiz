@@ -2,16 +2,18 @@ import pickle
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.preprocessing import normalize
+from sklearn import preprocessing
 from scipy import signal
 
 class DigitAlgorithm:
-  def __init__(self, model_path, scaler_path,window_size = 16, resize_to=128, threshold =200):
+  # def __init__(self, model_path, scaler_path,window_size = 16, resize_to=128, threshold =200):
+  def __init__(self, model_path, scaler_path, pca_model_path, window_size = 14, resize_to=128, threshold =200):
     self.model = self.load_model(model_path)
     self.scaler = self. load_scaler(scaler_path)
     self.window_size = window_size
     self.resize_to = resize_to
     self.threshold = threshold
+    self.pca_model = self.load_pca(pca_model_path)
 
   def load_model(self, model_path):
     with open(model_path, 'rb') as file:
@@ -23,14 +25,32 @@ class DigitAlgorithm:
       scaler = pickle.load(file)
     return scaler
 
+  def load_pca(self, pca_path):
+    with open(pca_path, 'rb') as file:
+      pca = pickle.load(file)
+    return pca
+
   def edgeDetector(self, image):
     '''
     This function should get as input the grayscale 'image' and any additional
     parameters you need, and return 'edge_map': a binary image (same shape as 'image')
     with a value of 1 in each detected edge pixel and a value of zero otherwise.
     '''
-    edge_map = cv2.Canny(image,200,600) # Replace with edge detection code
+    edge_map = cv2.Canny(image,10,50) # Replace with edge detection code
     return edge_map
+  def new_hough_circle(self, img):
+    cv_circles_radius = []
+    cv_circles_centers = []
+    circles_cv = cv2.HoughCircles(img, method=cv2.HOUGH_GRADIENT, dp=1, minDist=1,
+                                  param1=50, param2=23, minRadius=5, maxRadius=20)
+
+    if circles_cv is not None:
+      print('yay')
+      circles_cv = np.uint16(np.around(circles_cv))
+      for i in circles_cv[0, :]:
+        cv_circles_radius.append(i[2])
+        cv_circles_centers.append((i[0], i[1]))
+    return cv_circles_centers, cv_circles_radius
 
   def HoughCircles(self, edge_map):
     '''
@@ -110,9 +130,9 @@ class DigitAlgorithm:
       circ = plt.Circle(center_coordinates, radius, color='red', fill=False)
       ax.add_artist(circ)
 
-  def extract_circled_digit(self,img, window_size):
+  def extract_circled_digit(self,img, window_size=14):
     edges = self.edgeDetector(img)
-    circles_center, circles_radius = self.HoughCircles(edges)
+    circles_center, circles_radius = self.new_hough_circle(edges) #TODO: or img?
 
     # Find only one center
     median_circle = np.ceil(np.median(circles_center, axis=0))
@@ -125,7 +145,7 @@ class DigitAlgorithm:
                 int(median_circle[0] - window_size / 2): int(median_circle[0] + window_size / 2)].copy()
     return digit_roi
 
-  def pre_process_img(self,img, resize_to = 128, threshold = 200):
+  def pre_process_img(self,img, resize_to = 128):
     plt.imshow(img,cmap='gray')
     plt.title("1")
     plt.show()
@@ -137,7 +157,8 @@ class DigitAlgorithm:
     plt.imshow(digit_roi, cmap='gray')
     plt.title("after bitwise")
     plt.show()
-    digit_roi = digit_roi > threshold
+    #digit_roi = digit_roi >= threshold
+    (thresh, digit_roi) = cv2.threshold(digit_roi, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     plt.imshow(digit_roi, cmap='gray')
     plt.title("after threshold")
     plt.show()
@@ -151,7 +172,8 @@ class DigitAlgorithm:
     return digit_roi
 
   def pre_process(self,img, scaler, resize_to = 128, threshold = 200):
-    X_test = self.pre_process_img(img, resize_to, threshold)
+    X_test = self.pre_process_img(img, resize_to)
+    X_test = preprocessing.scale(X_test)
     X_test = np.array(X_test).reshape(1,-1)
     # TODO: apply batching? or we want only one image?
     # X_test = np.expand_dims(X_test, axis=0)
@@ -180,6 +202,8 @@ class DigitAlgorithm:
     plt.imshow(input.reshape(self.resize_to, self.resize_to), cmap='gray')
     plt.title('input to recognition model')
     plt.show()
+    #TODO: new - check with roy
+    input = self.pca_model.transform(input).reshape(1,-1)
     result = int(self.model.predict(input))
     return result
   
@@ -198,10 +222,12 @@ class DigitAlgorithm:
     return 1
 
 if __name__ == "__main__":
-  image_path = '../test/savedImage1.jpg'
+  image_path = '../test/scanned3.jpg'
   # Read the image in grayscale
   img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+  img = cv2.resize(img,(800,200))
+
   # initialize our model:
-  detector = DigitAlgorithm("pickle_model.pkl","scaler.pkl")
+  detector = DigitAlgorithm("saga_normal_model.pkl","new_scaler.pkl","pca_model.pkl")
   result = detector.predict(img)
   print(result)
