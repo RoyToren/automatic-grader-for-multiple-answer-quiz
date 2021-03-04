@@ -38,12 +38,30 @@ class DigitAlgorithm:
     '''
     edge_map = cv2.Canny(image,10,50) # Replace with edge detection code
     return edge_map
+  
   def new_hough_circle(self, img):
     cv_circles_radius = []
     cv_circles_centers = []
-    circles_cv = cv2.HoughCircles(img, method=cv2.HOUGH_GRADIENT, dp=1, minDist=1,
-                                  param1=50, param2=23, minRadius=5, maxRadius=20)
-
+    circles_cv = cv2.HoughCircles(img,method=cv2.HOUGH_GRADIENT,dp=1,minDist=1,
+                                    param1=50,param2=23,minRadius=5,maxRadius=20)
+    
+    # if (circles_cv is None) or (circles_cv.size >= 100):
+    #   blur_img = cv2.GaussianBlur(img,(3,3),0)
+    #   circles_cv = cv2.HoughCircles(blur_img,method=cv2.HOUGH_GRADIENT,dp=1,minDist=1,
+    #                         param1=10,param2=23,minRadius=4,maxRadius=35)
+    dp = 0.5
+    blur_img = cv2.GaussianBlur(img,(3,3),0)
+    if (circles_cv is None) or (circles_cv.size >= 150):
+      circles_cv = cv2.HoughCircles(blur_img,method=cv2.HOUGH_GRADIENT_ALT,dp=dp,minDist=1,
+                              param1=10,param2=0.8,minRadius=2,maxRadius=20)
+      dp += 0.1
+      while dp < 3:
+        more = cv2.HoughCircles(blur_img,method=cv2.HOUGH_GRADIENT_ALT,dp=dp,minDist=1,
+                              param1=10,param2=0.8,minRadius=2,maxRadius=20)
+        if more is not None:
+          np.concatenate((circles_cv, more))
+        dp += 0.1
+        
     if circles_cv is not None:
       print('yay')
       circles_cv = np.uint16(np.around(circles_cv))
@@ -131,8 +149,8 @@ class DigitAlgorithm:
       ax.add_artist(circ)
 
   def extract_circled_digit(self,img, window_size=14):
-    edges = self.edgeDetector(img)
-    circles_center, circles_radius = self.new_hough_circle(edges) #TODO: or img?
+    # edges = self.edgeDetector(img)
+    circles_center, circles_radius = self.new_hough_circle(img)
 
     # Find only one center
     median_circle = np.ceil(np.median(circles_center, axis=0))
@@ -167,7 +185,7 @@ class DigitAlgorithm:
   def pre_process_img_no_plot(self,img, resize_to = 128, threshold = 200):
     digit_roi = cv2.resize(img, (resize_to, resize_to))
     digit_roi = cv2.bitwise_not(digit_roi)
-    digit_roi = digit_roi > threshold
+    (thresh, digit_roi) = cv2.threshold(digit_roi, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     
     return digit_roi
 
@@ -181,7 +199,8 @@ class DigitAlgorithm:
     return X_test
   
   def pre_process_no_plot(self,img, scaler, resize_to = 128, threshold = 200):
-    X_test = self.pre_process_img_no_plot(img, resize_to, threshold)
+    X_test = self.pre_process_img_no_plot(img, resize_to)
+    X_test = preprocessing.scale(X_test)
     X_test = np.array(X_test).reshape(1,-1)
     # TODO: apply batching? or we want only one image?
     # X_test = np.expand_dims(X_test, axis=0)
@@ -211,6 +230,8 @@ class DigitAlgorithm:
     result = []
     digit_roi = self.extract_circled_digit(img,self.window_size)
     input = self.pre_process_no_plot(digit_roi,self.scaler,self.resize_to)
+    #TODO: new - check with roy
+    input = self.pca_model.transform(input).reshape(1,-1)
     result = int(self.model.predict(input))
     return result
   
@@ -222,12 +243,12 @@ class DigitAlgorithm:
     return 1
 
 if __name__ == "__main__":
-  image_path = '../test/scanned3.jpg'
+  image_path = '../test/no_dot_sample/tester322.jpg'
   # Read the image in grayscale
   img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
   img = cv2.resize(img,(800,200))
 
   # initialize our model:
-  detector = DigitAlgorithm("saga_normal_model.pkl","new_scaler.pkl","pca_model.pkl")
+  detector = DigitAlgorithm("saga_l1_model.pkl","new_scaler.pkl","pca_model.pkl")
   result = detector.predict(img)
   print(result)

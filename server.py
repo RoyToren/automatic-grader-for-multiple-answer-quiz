@@ -17,7 +17,7 @@ import random
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 tasks = {}
 results = {}
-detector = DigitAlgorithm("pickle_model.pkl","scaler.pkl")
+detector = DigitAlgorithm("saga_l1_model.pkl","new_scaler.pkl","pca_model.pkl")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 80))
@@ -168,12 +168,10 @@ def extract_questions_from_image(image,questions_count):
     '''
     edge_map = cv2.Canny(image, 200,600)
     # lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=800,)
-    lines = cv2.HoughLinesP( edge_map,rho=2,theta=np.pi/180,threshold=600,minLineLength = 100, maxLineGap = 1)
+    lines = cv2.HoughLinesP( edge_map,rho=7,theta=np.pi/180,threshold=600,minLineLength = 100, maxLineGap = 1)
     # Compute lines
     if lines is not None:
         lines = np.sort(lines, axis=0)
-        if len(lines) == questions_count*2:
-            lines = lines[::2]
         x1, x2, y1, y2 = [], [], [], []
         for line in lines:
             points = line[0]
@@ -192,5 +190,5 @@ def extract_questions_from_image(image,questions_count):
 
 def batel_algo(image):
   # initialize our model:
-
+  image = cv2.resize(image,(800,200))
   return detector.predict(image)

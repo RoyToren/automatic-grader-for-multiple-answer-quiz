@@ -154,7 +154,7 @@ function App() {
                 clearInterval(currID);
                 alert('internal error, please try again');
               }
-            }, 20000);
+            }, 3000);
       });
     }
 
