@@ -12,17 +12,11 @@ class DigitAlgorithm:
     self.window_size = window_size
     self.resize_to = resize_to
     self.threshold = threshold
-    self.pca_model = self.load_pca(pca_model_path)
 
   def load_scaler(self, scaler_path):
     with open(scaler_path, 'rb') as file:
       scaler = pickle.load(file)
     return scaler
-
-  def load_pca(self, pca_path):
-    with open(pca_path, 'rb') as file:
-      pca = pickle.load(file)
-    return pca
 
   def edgeDetector(self, image):
     '''
@@ -215,18 +209,18 @@ class DigitAlgorithm:
     plt.imshow(input.reshape(self.resize_to, self.resize_to), cmap='gray')
     plt.title('input to recognition model')
     plt.show()
-    #TODO: new - check with roy
-    input = self.pca_model.transform(input).reshape(1,-1)
-    result = int(self.model.predict(input))
+    #add ocr here - ./.apt/usr/share/tesseract-ocr/4.00/tessdata is the path in the server
+    # input = self.pca_model.transform(input).reshape(1,-1)
+    # result = int(self.model.predict(input))
     return result
   
   def predict_result(self, img):
     result = []
     digit_roi = self.extract_circled_digit(img,self.window_size)
     input = self.pre_process_no_plot(digit_roi,self.scaler,self.resize_to)
-    
-    input = self.pca_model.transform(input).reshape(1,-1)
-    result = int(self.model.predict(input))
+    #add ocr here - ./.apt/usr/share/tesseract-ocr/4.00/tessdata is the path in the server
+    # input = self.pca_model.transform(input).reshape(1,-1)
+    # result = int(self.model.predict(input))
     return result
   
   def extract_image(self, img):
@@ -243,6 +237,6 @@ if __name__ == "__main__":
   img = cv2.resize(img,(800,200))
 
   # initialize our model:
-  detector = DigitAlgorithm("saga_l1_model.pkl","new_scaler.pkl","pca_model.pkl")
+  detector = DigitAlgorithm("scaler.pkl")
   result = detector.predict(img)
   print(result)
