@@ -17,7 +17,7 @@ import random
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 tasks = {}
 results = {}
-detector = DigitAlgorithm("saga_l1_model.pkl","new_scaler.pkl","pca_model.pkl")
+detector = DigitAlgorithm("scaler.pkl")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 80))
