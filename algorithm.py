@@ -8,17 +8,11 @@ from scipy import signal
 class DigitAlgorithm:
   # def __init__(self, model_path, scaler_path,window_size = 16, resize_to=128, threshold =200):
   def __init__(self, model_path, scaler_path, pca_model_path, window_size = 14, resize_to=128, threshold =200):
-    self.model = self.load_model(model_path)
     self.scaler = self. load_scaler(scaler_path)
     self.window_size = window_size
     self.resize_to = resize_to
     self.threshold = threshold
     self.pca_model = self.load_pca(pca_model_path)
-
-  def load_model(self, model_path):
-    with open(model_path, 'rb') as file:
-      model = pickle.load(file)
-    return model
 
   def load_scaler(self, scaler_path):
     with open(scaler_path, 'rb') as file:
@@ -230,7 +224,7 @@ class DigitAlgorithm:
     result = []
     digit_roi = self.extract_circled_digit(img,self.window_size)
     input = self.pre_process_no_plot(digit_roi,self.scaler,self.resize_to)
-    #TODO: new - check with roy
+    
     input = self.pca_model.transform(input).reshape(1,-1)
     result = int(self.model.predict(input))
     return result
