@@ -94,7 +94,7 @@ class DigitAlgorithm:
     plt.title('input to recognition model')
     plt.show()
     
-    pytesseract.pytesseract.tesseract_cmd = r'./.apt/usr/share/tesseract-ocr/4.00/tessdata'
+    # pytesseract.pytesseract.tesseract_cmd = r'/app/.apt/usr/bin/tesseract'
     dic = pytesseract.image_to_data(digit_roi,config='--psm 10', output_type=Output.DICT)
     for letter in dic["text"]:
       if letter!='':
@@ -109,7 +109,7 @@ class DigitAlgorithm:
     result = []
     digit_roi = self.extract_circled_digit(img,self.window_size)
     digit_roi = self.pre_process_img_no_plot(digit_roi, resize_to = 128)
-    pytesseract.pytesseract.tesseract_cmd = r'./.apt/usr/share/tesseract-ocr/4.00/tessdata'
+    # pytesseract.pytesseract.tesseract_cmd = r'/app/.apt/usr/bin/tesseract'
     dic = pytesseract.image_to_data(digit_roi,config='--psm 10', output_type=Output.DICT)
     for letter in dic["text"]:
       if letter!='':
