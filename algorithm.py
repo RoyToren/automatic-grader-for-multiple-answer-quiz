@@ -6,6 +6,8 @@ from sklearn import preprocessing
 from scipy import signal
 import pytesseract
 from pytesseract import Output
+import re
+
 
 class DigitAlgorithm:
   def __init__(self, window_size = 14, resize_to=128, threshold =200):
@@ -96,27 +98,34 @@ class DigitAlgorithm:
     
     # pytesseract.pytesseract.tesseract_cmd = r'app/.apt/usr/share/tesseract-ocr/4.00/tessdata'
     dic = pytesseract.image_to_data(digit_roi,config='--psm 10', output_type=Output.DICT)
-    for letter in dic["text"]:
-      if letter!='':
-        res = [int(i) for i in letter.split() if i.isdigit()]
-        result= int(res[0])
+    for sentence in dic["text"]:
+      if sentence!='':
+        reg = re.findall(r'\d+', sentence)
+        res = list(map(int, reg))
+        if res:
+          result= res[0]
+        else:
+          result = -1
+    return result
           
     print("is the letter correct?")
     print(result)
 
-    return int(result)
+    return result
   
   def predict(self, img):
-    result = []
     digit_roi = self.extract_circled_digit(img,self.window_size)
     digit_roi = self.pre_process_img_no_plot(digit_roi, resize_to = 128)
     # pytesseract.pytesseract.tesseract_cmd = r'app/.apt/usr/share/tesseract-ocr/4.00/tessdata'
     dic = pytesseract.image_to_data(digit_roi,config='--psm 10', output_type=Output.DICT)
-    for letter in dic["text"]:
-      if letter!='':
-        res = [int(i) for i in letter.split() if i.isdigit()]
-        result= int(res[0])
-
+    for sentence in dic["text"]:
+      if sentence!='':
+        reg = re.findall(r'\d+', sentence)
+        res = list(map(int, reg))
+        if res:
+          result= res[0]
+        else:
+          result = -1
     return result
   
   def extract_image(self, img):
