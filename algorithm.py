@@ -94,11 +94,12 @@ class DigitAlgorithm:
     plt.title('input to recognition model')
     plt.show()
     
-    # pytesseract.pytesseract.tesseract_cmd = r'/app/.apt/usr/bin/tesseract'
+    # pytesseract.pytesseract.tesseract_cmd = r'app/.apt/usr/share/tesseract-ocr/4.00/tessdata'
     dic = pytesseract.image_to_data(digit_roi,config='--psm 10', output_type=Output.DICT)
     for letter in dic["text"]:
       if letter!='':
-          result = letter
+        res = [int(i) for i in letter.split() if i.isdigit()]
+        result= int(res[0])
           
     print("is the letter correct?")
     print(result)
@@ -109,13 +110,14 @@ class DigitAlgorithm:
     result = []
     digit_roi = self.extract_circled_digit(img,self.window_size)
     digit_roi = self.pre_process_img_no_plot(digit_roi, resize_to = 128)
-    # pytesseract.pytesseract.tesseract_cmd = r'/app/.apt/usr/bin/tesseract'
+    # pytesseract.pytesseract.tesseract_cmd = r'app/.apt/usr/share/tesseract-ocr/4.00/tessdata'
     dic = pytesseract.image_to_data(digit_roi,config='--psm 10', output_type=Output.DICT)
     for letter in dic["text"]:
       if letter!='':
-          result = letter
+        res = [int(i) for i in letter.split() if i.isdigit()]
+        result= int(res[0])
 
-    return int(result)
+    return result
   
   def extract_image(self, img):
     plt.imshow(img,cmap='gray')
