@@ -13,11 +13,10 @@ import base64
 import random
 
 
-#prod
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 tasks = {}
 results = {}
-detector = DigitAlgorithm("scaler.pkl")
+detector = DigitAlgorithm()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 80))
@@ -43,7 +42,7 @@ def get_results(task_id):
 
 def do_work(questions_images, checker_results ,answers,results, task_id):
     for key, img in enumerate(questions_images):
-        answer = batel_algo(img)
+        answer = detection_algorithm(img)
         checker_results['detected_answers'].append({
             'question': key + 1,
             'answer' : answer})
@@ -58,23 +57,6 @@ def do_work(questions_images, checker_results ,answers,results, task_id):
             'question': key + 1,
             'answer' : answer})
         
-    # checker_results = {
-    #     'questions_count': 6,#questions_count,
-    #     'answers' : [
-    #         {'question': 1,
-    #          'answer' : 0},
-    #         {'question': 2,
-    #          'answer' : 1},
-    #         {'question': 4,
-    #          'answer' :  0},
-    #         {'question': 5,
-    #          'answer' :  0},
-    #         {'question': 6,
-    #          'answer' :  0}
-    #     ],
-    #     'total_correct': 1,
-    #     'total_wrong': 5
-    # }
     results[task_id] = checker_results
         
 @app.route('/api/checkTest', methods=['POST'])
@@ -103,63 +85,9 @@ def start_task():
     return jsonify({'task_id': new_task_id, 'total_tasks': len(tasks)})
 
 
-# def check_test(questions_images, checker_results ,answers): 
-    
-
-
-# def check_test():
-#     questions_count = 0
-#     answers = {}
-#     for field_name in request.form:
-#         if field_name == 'questions_count':
-#             questions_count = int(request.form[field_name])
-#         else:
-#             answers[int(field_name)] = int(request.form[field_name])
-#     cv_image = process_image(request.files['images'])
-    
-#     questions_images = extract_questions_from_image(cv_image)
-#     checker_results = {'questions_count': questions_count,
-#         'answers' : [],
-#         'total_correct': 0,
-#         'total_wrong': 0
-#         }
-#     for key, img in enumerate(questions_images):
-#         answer = batel_algo(img)
-#         if(answer == answers[key+1]):
-#             checker_results['total_correct'] = checker_results['total_correct'] + 1
-#             answer = 1
-#         else:
-#             checker_results['total_wrong'] = checker_results['total_wrong'] + 1
-#             answer = 0
-            
-#         checker_results['answers'].append({
-#             'question': key + 1,
-#             'answer' : answer})
-        
-#     # checker_results = {
-#     #     'questions_count': 6,#questions_count,
-#     #     'answers' : [
-#     #         {'question': 1,
-#     #          'answer' : 0},
-#     #         {'question': 2,
-#     #          'answer' : 1},
-#     #         {'question': 4,
-#     #          'answer' :  0},
-#     #         {'question': 5,
-#     #          'answer' :  0},
-#     #         {'question': 6,
-#     #          'answer' :  0}
-#     #     ],
-#     #     'total_correct': 1,
-#     #     'total_wrong': 5
-#     # }
-#     return jsonify(checker_results)
-
 def process_image(raw_image):
     img = Image.open(raw_image)
-    #convert string data to numpy array
     img_array = np.array(img)
-    # convert numpy array to image
     greyscale_img = img_array
     cv_image = cv2.cvtColor(img_as_ubyte(greyscale_img), cv2.COLOR_BGR2GRAY)
     return cv_image
@@ -171,7 +99,6 @@ def extract_questions_from_image(image,questions_count):
     with a value of 1 in each detected edge pixel and a value of zero otherwise.
     '''
     edge_map = cv2.Canny(image, 200,600)
-    # lines = cv2.HoughLines(edge_map,rho=1,theta=np.pi/180,threshold=800,)
     lines = cv2.HoughLinesP( edge_map,rho=7,theta=np.pi/180,threshold=600,minLineLength = 100, maxLineGap = 1)
     # Compute lines
     if lines is not None:
@@ -192,7 +119,7 @@ def extract_questions_from_image(image,questions_count):
         return questions_images
     return [image]
 
-def batel_algo(image):
+def detection_algorithm(image):
   # initialize our model:
   image = cv2.resize(image,(800,200))
-  return detector.predict_result(image)
+  return detector.predict(image)
